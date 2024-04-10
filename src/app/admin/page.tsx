@@ -2,19 +2,19 @@ import {
     Card,
     CardContent,
     CardDescription,
-    CardHeader, 
-    CardTitle 
+    CardHeader,
+    CardTitle
 } from "@/components/ui/card";
 import db from "@/db/db"
 
 async function getSalesData() {
     const data = await db.order.aggregate({
         _sum: { pricePaidInCents: true },
-        _count:true
+        _count: true
     })
 
     return {
-        amount: (data._sum.pricePaidInCents || 0) /100,
+        amount: (data._sum.pricePaidInCents || 0) / 100,
         numberOfSales: data._count
     }
 }
@@ -24,10 +24,10 @@ export default async function AdminDashboard() {
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <DashboardCard 
-            title="Sales" 
-            subtitle={salesData.numberOfSales}
-            body={salesData.amount}/>
+            <DashboardCard
+                title="Sales"
+                subtitle={`${formatNumber(salesData.numberOfSales)} Orders`}
+                body={formatCurrency(salesData.amount)} />
 
         </div>
     )
@@ -49,7 +49,7 @@ function DashboardCard({ title, subtitle, body }:
             <CardTitle>{title}</CardTitle>
             <CardDescription>{subtitle}</CardDescription>
         </CardHeader>
-        
+
         <CardContent>
             <p>{body}</p>
         </CardContent>

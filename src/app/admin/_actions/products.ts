@@ -1,11 +1,12 @@
-//The purpose of this file is to get the data that from the form we are using server side rendering. 
+//The purpose of this file is to get the data that from the form to add a new product
 
 "use server"
 import db from "@/db/db"
-import { z } from "zod"
+import { z } from "zod" // this l
 import fs from "fs/promises"
+import { redirect } from "next/dist/server/api-utils";
 
-//using zad library
+//using zod library
 const fileSchema = z.instanceof(File, { message: "Requiered" });
 const imageSchema = fileSchema.refine(
     // if file size is 0 there is no file submitted
@@ -31,18 +32,23 @@ export async function addProduct(formData: FormData) {
 
     const data = result.data
 
-    fs.mkdir("products", { recursive: true })
+    await fs.mkdir("products", { recursive: true })
+    const filePath = `products/${crypto.randomUUID()}--${data.file.name}`
+    await fs.writeFile(filePath, Buffer.from(await data.file.arrayBuffer()))
 
-    db.product.create({
-        data: {
+    await fs.mkdir("public/products", { recursive: true })
+    const imagePath = `products/${crypto.randomUUID()}--${data.image.name}`
+    await fs.writeFile(`public${imagePath}`, Buffer.from(await data.image.arrayBuffer()))
+
+    db.product.create({ data: {
             name: data.name,
             description: data.description,
-            priceInCents: data.priceInCents
-        filePath:
-                imagePath:
+            priceInCents: data.priceInCents,
+            filePath,
+            imagePath
         }
     })
+    redirect("/admin/products")
 }
 
 
-}

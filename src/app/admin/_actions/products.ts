@@ -4,7 +4,7 @@
 import db from "@/db/db"
 import { z } from "zod" // this l
 import fs from "fs/promises"
-import { redirect } from "next/dist/server/api-utils";
+import { redirect } from "next/navigation";
 
 //using zod library
 const fileSchema = z.instanceof(File, { message: "Requiered" });

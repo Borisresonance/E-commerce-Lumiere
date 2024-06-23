@@ -9,7 +9,7 @@ declare global {
 }
 
 const db = globalThis.prisma ?? prismaClientSingleton()
-
+// single primary export of this file 
 export default db
 
 if (process.env.NODE_ENV !== 'production') globalThis.prisma = db

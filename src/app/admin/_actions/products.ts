@@ -2,7 +2,7 @@
 
 "use server"
 import db from "@/db/db"
-import { z } from "zod" // this l
+import { z } from "zod" // this a typescript schema validation lib
 import fs from "fs/promises"
 import { redirect } from "next/navigation";
 
@@ -18,13 +18,14 @@ const imageSchema = fileSchema.refine(
 const addSchema = z.object({
     name: z.string().min(1),//name must be a string 
     description: z.string().min(1),
+    // convert input value into number, integer minimun 1 
     priceInCents: z.coerce.number().int().min(1),
     file: fileSchema.refine(file => file.size > 0, "Requiered"), //this will test if the file is not empy
     image: fileSchema.refine(file => file.size > 0, "Required")  //same here will test if file not empty
 })
 
 //this function will use the object schema 
-export async function addProduct(formData: FormData) {
+export async function addProduct(prevState: unknown,formData: FormData) {
     const result = addSchema.safeParse(Object.fromEntries(formData.entries()))
     if (result.success === false) {
         return result.error.formErrors.fieldErrors
@@ -38,9 +39,14 @@ export async function addProduct(formData: FormData) {
 
     await fs.mkdir("public/products", { recursive: true })
     const imagePath = `products/${crypto.randomUUID()}--${data.image.name}`
-    await fs.writeFile(`public${imagePath}`, Buffer.from(await data.image.arrayBuffer()))
+    await fs.writeFile(
+        `public${imagePath}`, 
+        Buffer.from(await data.image.arrayBuffer())
+    )
 
-    db.product.create({ data: {
+    db.product.create({ 
+        data: {
+            isAvailableForPurchase: false,
             name: data.name,
             description: data.description,
             priceInCents: data.priceInCents,
